@@ -1,0 +1,89 @@
+<html>
+<head>
+    <style>
+        #container {
+            background-color: #F3F4F6;
+            width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .link {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script>
+        let container = document.getElementById("container");
+        let params = new URLSearchParams(window.location.search);
+        let url = params.get("url");
+        if (url) {
+            details();
+        } else {
+            container.innerHTML = "<h1>Data not Found</h1>";
+        }
+        function details() {
+            fetch("https://freenewsapi.ai/v1/article?url=" + encodeURIComponent(url))
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                console.log(data);
+                let article = data;
+                let html = "";
+                html += "<button><a class='link' href='page1.html'>Back</a></button>";
+                if (article.title) {
+                    html += "<h2>Title: " + article.title + "</h2>";
+                } else {
+                    html += "<h2>Title not found</h2>";
+                }
+                if (article.image) {
+                    html += "<img src='" + article.image + "' width='200'>";
+                } else {
+                    html += "<img src='games.jpeg' width='200'>";
+                }
+                if (article.description) {
+                    html += "<p>Description: " + article.description + "</p>";
+                }
+                if (article.published_at) {
+                    html += "<p>Published at: " + article.published_at + "</p>";
+                }
+                if (article.url) {
+                    html += "<p><a href='" + article.url + "' target='_blank'>Read Article</a></p>";
+                }
+                if (article.crawled_at) {
+                    html += "<p>Crawled at: " + article.crawled_at + "</p>";
+                }
+                if (article.host) {
+                    html += "<p>Host: " + article.host + "</p>";
+                }
+                if (article.sitename) {
+                    html += "<p>Site name: " + article.sitename + "</p>";
+                }
+                if (article.country) {
+                    html += "<p>Country: " + article.country + "</p>";
+                }
+                if (article.country_source) {
+                    html += "<p>Country source: " + article.country_source + "</p>";
+                }
+                if (article.lang) {
+                    html += "<p>Language: " + article.lang + "</p>";
+                }
+                if (article.tld) {
+                    html += "<p>TLD: " + article.tld + "</p>";
+                }
+                if (article.author) {
+                    html += "<p>Author: " + article.author + "</p>";
+                }
+                if (article.categories) {
+                    html += "<p>Categories: " + article.categories + "</p>";
+                }
+                container.innerHTML = html;
+
+            });
+        }
+    </script>
+</body>
+</html>

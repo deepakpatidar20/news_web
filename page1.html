@@ -1,0 +1,144 @@
+<html>
+<head>
+    <title>News Pagination</title>
+    <style>
+        #data-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px;
+        }
+        .link {
+            width: 270px;
+            color: black;
+            text-decoration: none;
+        }
+        .card {
+            background: #f3f4f6;
+            padding: 10px;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        #pagination-container {
+            text-align: center;
+            margin: 20px;
+        }
+        /* button {
+            padding: 8px 12px;
+            margin: 3px;
+            cursor: pointer;
+        } */
+        .active {
+            background: #007bff;
+            color: white;
+            /* border: none; */
+        }
+    </style>
+</head>
+<body>
+    <form id="search-form">
+        <input type="text" id="search" placeholder="Search news">
+        <button type="submit">Search</button>
+    </form>
+    <h3 id="page-info"></h3>
+    <div id="data-container"></div>
+    <div id="pagination-container"></div>
+    <script>
+        let data = [];
+        let limit = 8;
+        let currentSearch = "india";
+        function one(page, searchNew) {
+            let container = document.getElementById("data-container");
+            let pagination = document.getElementById("pagination-container");
+            let pageInfo = document.getElementById("page-info");
+            if (searchNew) {
+                container.innerHTML = "Loading...";
+                pagination.innerHTML = "";
+                fetch("https://freenewsapi.ai/v1/search?q=" +
+                    encodeURIComponent(currentSearch) + "&size=50&offset=0")
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(result) {
+                    data = result.results || [];
+                    one(page, false);
+                });
+                return;
+            }
+            container.innerHTML = "";
+            pagination.innerHTML = "";
+            let totalPages = Math.ceil(data.length / limit);
+            if (data.length == 0) {
+                container.innerHTML = "No news found";
+                pageInfo.innerHTML = "";
+                return;
+            }
+            if (page < 1) {
+                page = 1;
+            }
+            if (page > totalPages) {
+                page = totalPages;
+            }
+            history.replaceState(null, "", "?page=" + page);
+            pageInfo.innerHTML = "Page " + page;
+            let start = (page - 1) * limit;
+            let end = start + limit;
+            let html = "";
+            for (let i = start; i < end && i < data.length; i++) {
+                html += "<a class='link' href='page2.html?url=" + encodeURIComponent(data[i].url || "") + "'>";
+                html += "<div class='card'>";
+                if(data[i].title){
+                html += "<h3>" + (data[i].title) + "</h3>";
+                }
+                if(data[i].image){
+                html += "<img src='" +(data[i].image) + "'>";
+                }else{
+                html += "<img src='games.jpeg'>";
+                }
+
+                if(data[i].description){
+                html += "<p>" +(data[i].description) + "</p>";
+
+                }
+                if(data[i].published_at){
+                html += "<p>" +(data[i].published_at) + "</p>";
+
+                }
+                html += "</div></a>";
+            }
+            container.innerHTML = html;
+            for (let i = 1; i <= totalPages; i++) {
+                let button = document.createElement("button");
+                button.innerHTML = i;
+                if (i == page) {
+                    button.className = "active";
+                }
+                button.onclick = function() {
+                    one(i, false);
+                };
+                pagination.appendChild(button);
+            }
+        }
+        document.getElementById("search-form").addEventListener(
+            "submit",
+            function(event) {
+                event.preventDefault();
+                currentSearch = document.getElementById("search").value.trim();
+                if (currentSearch == "") {
+                    currentSearch = "india";
+                }
+                one(1, true);
+            }
+        );
+
+        let params = new URLSearchParams(location.search);
+        let page = Number(params.get("page")) || 1;
+        one(page, true);
+    </script>
+</body>
+</html>
